@@ -77,13 +77,13 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     if request.method == "GET":
+        context = dict()
         url = "https://82521961.us-south.apigw.appdomain.cloud/api/dealership"
         # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        context["dealerships"] = dealerships
         # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        return render(request, 'djangoapp/index.html', context)
 
 def get_reviews(request):
     if request.method == "GET":
@@ -97,15 +97,15 @@ def get_reviews(request):
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealer_id):
+    context = dict()
     if request.method == "GET":
         url = "https://82521961.us-south.apigw.appdomain.cloud/api/reviews"
         # Get dealers from the URL
         reviews = get_dealer_by_id_from_cf(url,dealerId=dealer_id)
-        review_output = ""
-        for review in reviews:
-            review_output = "Review " + review.review + " Sentiment: " + str(review.sentiment)
+        context["review_list"] = reviews        
+        context["dealer_id"] = dealer_id
         # Return a list of dealer short name
-        return HttpResponse(review_output)
+        return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
@@ -113,8 +113,7 @@ def add_review(request, dealer_id):
     if request.method == 'GET':
         return render(request, 'djangoapp/add_review.html', context)
     if request.method == "POST":
-        review = dict()
-        
+        review = dict()        
         review["dealership"] = dealer_id        
         review["name"] = request.POST['name']
         review["purchase"] = request.POST['purchase']

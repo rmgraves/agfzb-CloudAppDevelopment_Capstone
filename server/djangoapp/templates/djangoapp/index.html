@@ -11,8 +11,8 @@
     <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/bootstrap-table.min.js"></script>
     <script src="https://unpkg.com/bootstrap-table@1.18.2/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
 
-</head>
 
+</head>
     <body>
          <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
@@ -27,7 +27,7 @@
                 </li>
                 {% else %}
                 <li>
-                    <form class="form-inline" action="{% url 'djangoapp:logout' %}" method="post">
+                    <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
                         {% csrf_token %}
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Username" name="username" >
@@ -41,9 +41,24 @@
             </ul>
         </div>
         </nav>
+        <table class="table" id="table" data-filter-control="true">
+            <thead>
+                <tr><th>ID</th><th>Dealer Name</th><th>City</th> <th>Address</th> <th>Zip</th> <th data-filter-control="select">State</th> </tr>
+            </thead>
+            <tbody>
+                {% for dealership in dealerships %}
+                <tr><td>{{ dealership.id }}</td><td><a href="{% url 'djangoapp:dealer_details' dealership.id %}">{{dealership.full_name}}</a></td><td>{{ dealership.city }}</td><td>{{ dealership.address }}</td><td>{{ dealership.zip }}</td><td>{{ dealership.st }}</td></tr>
+                {% endfor %}
+            </tbody>
 
-    <!--Add a dealer table here -->
+        </table>
 
     </body>
+
+<script>
+  $(function() {
+    $('#table').bootstrapTable()
+  })
+</script>
 
 </html>
