@@ -2,7 +2,7 @@ import requests
 import json
 # import related models here
 from requests.auth import HTTPBasicAuth
-from .models import CarDealer, DealerReview
+from .models import CarDealer, DealerReview, CarModel, CarMake
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_watson.natural_language_understanding_v1 import Features, EntitiesOptions, KeywordsOptions
@@ -56,10 +56,25 @@ def get_dealers_from_cf(url, **kwargs):
 
     return results
 
+def get_dealer_by_id_from_cf(url, dealerId):
+    results = []
+    json_result = get_request(url,id=dealerId)
+    if json_result:
+        # Get the row list in JSON as dealers
+        dealers = json_result["docs"]
+        # For each dealer object
+        for dealer in dealers:              
+            dealer_obj = CarDealer(address=dealer["address"], city=dealer["city"], full_name=dealer["full_name"],
+                                   id=dealer["id"], lat=dealer["lat"], long=dealer["long"],
+                                   short_name=dealer["short_name"],
+                                   st=dealer["st"], zip=dealer["zip"])
+            results.append(dealer_obj)
+    return results
+
 # Create a get_dealer_reviews_from_cf method to get reviews by dealer id from a cloud function
 def get_dealer_reviews_by_id_from_cf(url, dealerId):
     results = []
-    json_result = get_request(url, dealer=dealerId)
+    json_result = get_request(url, dealership=dealerId)
     if json_result:
         # Get the row list in JSON as dealers
         reviews = json_result["docs"]
@@ -92,5 +107,9 @@ def analyze_review_sentiments(text_to_analyze):
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
 
-
-
+def get_car_models_and_makes_for_dealer(in_dealer_id):
+    carmodels = CarModel.objects.filter(dealer_id=in_dealer_id)
+    car_models = []
+    for car_model in carmodels:
+        car_models.append(car_model)
+    return carmodels

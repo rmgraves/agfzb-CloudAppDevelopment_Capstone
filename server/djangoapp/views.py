@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-from .restapis import get_dealers_from_cf, get_dealer_reviews_by_id_from_cf, post_request
+from .restapis import get_dealers_from_cf, get_dealer_reviews_by_id_from_cf, post_request, get_car_models_and_makes_for_dealer, get_dealer_by_id_from_cf
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -101,11 +101,13 @@ def get_dealer_details(request, dealer_id):
 def add_review(request, dealer_id):
     context = {}
     if request.method == 'GET':
-        url = "https://82521961.us-south.apigw.appdomain.cloud/api/reviews"
+        url = "https://82521961.us-south.apigw.appdomain.cloud/api/get-dealership"
         # Get dealers from the URL
-        dealer_reviews = get_dealer_reviews_by_id_from_cf(url,dealerId=dealer_id)
-        context["dealer_name"] = dealer_reviews[0].name
+        dealers = get_dealer_by_id_from_cf(url,dealerId=dealer_id)
+        car_models = get_car_models_and_makes_for_dealer(dealer_id)
+        context["dealer_name"] = dealers[0].full_name
         context["dealer_id"] = dealer_id
+        context["car_models"] = car_models
         return render(request, 'djangoapp/add_review.html', context)
     if request.method == "POST":
         review = dict()        
