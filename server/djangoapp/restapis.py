@@ -57,7 +57,7 @@ def get_dealers_from_cf(url, **kwargs):
     return results
 
 # Create a get_dealer_reviews_from_cf method to get reviews by dealer id from a cloud function
-def get_dealer_by_id_from_cf(url, dealerId):
+def get_dealer_reviews_by_id_from_cf(url, dealerId):
     results = []
     json_result = get_request(url, dealer=dealerId)
     if json_result:
@@ -85,7 +85,10 @@ def analyze_review_sentiments(text_to_analyze):
     features=Features(
         entities=EntitiesOptions(emotion=True, sentiment=True, limit=2),
         keywords=KeywordsOptions(emotion=True, sentiment=True, limit=2))).get_result()   
-    return response
+
+    sentiment = response["keywords"][0]["sentiment"]["label"]
+
+    return sentiment
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
 

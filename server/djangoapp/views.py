@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-from .restapis import get_dealers_from_cf, get_dealer_by_id_from_cf, post_request
+from .restapis import get_dealers_from_cf, get_dealer_reviews_by_id_from_cf, post_request
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
@@ -85,23 +85,13 @@ def get_dealerships(request):
         # Return a list of dealer short name
         return render(request, 'djangoapp/index.html', context)
 
-def get_reviews(request):
-    if request.method == "GET":
-        url = "https://82521961.us-south.apigw.appdomain.cloud/api/reviews"
-        # Get dealers from the URL
-        reviews = get_dealer_by_id_from_cf(url,dealerId=15)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([review.name for review in reviews])
-        # Return a list of dealer short name
-        return HttpResponse(dealer_names)
-
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealer_id):
     context = dict()
     if request.method == "GET":
         url = "https://82521961.us-south.apigw.appdomain.cloud/api/reviews"
         # Get dealers from the URL
-        reviews = get_dealer_by_id_from_cf(url,dealerId=dealer_id)
+        reviews = get_dealer_reviews_by_id_from_cf(url,dealerId=dealer_id)
         context["review_list"] = reviews        
         context["dealer_id"] = dealer_id
         # Return a list of dealer short name
@@ -111,6 +101,11 @@ def get_dealer_details(request, dealer_id):
 def add_review(request, dealer_id):
     context = {}
     if request.method == 'GET':
+        url = "https://82521961.us-south.apigw.appdomain.cloud/api/reviews"
+        # Get dealers from the URL
+        dealer_reviews = get_dealer_reviews_by_id_from_cf(url,dealerId=dealer_id)
+        context["dealer_name"] = dealer_reviews[0].name
+        context["dealer_id"] = dealer_id
         return render(request, 'djangoapp/add_review.html', context)
     if request.method == "POST":
         review = dict()        
