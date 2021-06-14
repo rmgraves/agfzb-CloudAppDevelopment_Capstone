@@ -100,24 +100,34 @@ def get_dealer_details(request, dealer_id):
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
     context = {}
+    car_models = get_car_models_and_makes_for_dealer(dealer_id)
     if request.method == 'GET':
         url = "https://82521961.us-south.apigw.appdomain.cloud/api/get-dealership"
         # Get dealers from the URL
         dealers = get_dealer_by_id_from_cf(url,dealerId=dealer_id)
-        car_models = get_car_models_and_makes_for_dealer(dealer_id)
         context["dealer_name"] = dealers[0].full_name
         context["dealer_id"] = dealer_id
         context["car_models"] = car_models
         return render(request, 'djangoapp/add_review.html', context)
+
     if request.method == "POST":
         review = dict()        
         review["dealership"] = dealer_id        
-        review["name"] = request.POST['name']
-        review["purchase"] = request.POST['purchase']
-        review["review"] = request.POST['review']
-
+        review["name"] = request.user.first_name + " " + request.user.last_name
+        review["purchase"] = request.POST["purchasecheck"]
+        review["review"] = request.POST["review"]
+        review["purchase_date"] = request.POST["purchase_date"]
+        
+        car_id = request.POST["car"]
+        for car in car_models:
+            if(car.id == car_id):
+                review["car_make"] = car.make.name
+                review["car_model"] = car.name
+                review["car_year"] = car.year
+        
         json_payload = dict()
         json_payload["doc"] = review
         url = "https://82521961.us-south.apigw.appdomain.cloud/api/add-review"
         post_request(url, json_payload)
+        redirect("djangoapp:dealer_details", dealer_id=dealer_id)
 
