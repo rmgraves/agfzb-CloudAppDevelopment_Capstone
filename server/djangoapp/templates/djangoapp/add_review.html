@@ -19,7 +19,7 @@
                 <textarea class="form-control" id="review" name="review" rows="2" required></textarea>            </div>
                 <br> 
             <div class="form-check">                            
-                <input class="form-check-input" type="checkbox" value="" id="purchasecheck">
+                <input class="form-check-input" type="checkbox" id="purchasecheck" name="purchasecheck">
                 <label class="form-check-label" for="purchasecheck">
                     Has purchased the car from {{ dealer_name }}? (Select purchased car information below if checked)
                 </label>
@@ -36,7 +36,7 @@
             <br>
             <div> Select your purchase date: </div>
            <div class="input-group date">
-            <input type="text" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+            <input type="text" class="form-control" id="purchased_date" name="purchased_date"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
             </div> 
             <br>
             <button class="btn btn-primary" type="submit">Add Review</button>

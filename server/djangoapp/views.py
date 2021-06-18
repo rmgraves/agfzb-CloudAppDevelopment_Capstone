@@ -94,6 +94,7 @@ def get_dealer_details(request, dealer_id):
         reviews = get_dealer_reviews_by_id_from_cf(url,dealerId=dealer_id)
         context["review_list"] = reviews        
         context["dealer_id"] = dealer_id
+        
         # Return a list of dealer short name
         return render(request, 'djangoapp/dealer_details.html', context)
 
@@ -113,21 +114,28 @@ def add_review(request, dealer_id):
     if request.method == "POST":
         review = dict()        
         review["dealership"] = dealer_id        
-        review["name"] = request.user.first_name + " " + request.user.last_name
-        review["purchase"] = request.POST["purchasecheck"]
-        review["review"] = request.POST["review"]
-        review["purchase_date"] = request.POST["purchase_date"]
-        
-        car_id = request.POST["car"]
+        review["name"] = request.user.username
+        review["purchase"] = request.POST.get('purchasecheck', 'false')
+        review["review"] = request.POST.get('review', '')
+        review["purchase_date"] = request.POST.get('purchase_date', '')
+
+        if(review["purchase"] == "on"):
+            review["purchase"] = "true"
+        else:
+            review["purchase"] = "false"
+
+        car_id = request.POST.get("car", 1)
         for car in car_models:
-            if(car.id == car_id):
+            if(car.id == int(car_id)):
                 review["car_make"] = car.make.name
                 review["car_model"] = car.name
-                review["car_year"] = car.year
+                review["car_year"] = car.year.year
+
+        review["id"] = 1
         
         json_payload = dict()
         json_payload["doc"] = review
         url = "https://82521961.us-south.apigw.appdomain.cloud/api/add-review"
         post_request(url, json_payload)
-        redirect("djangoapp:dealer_details", dealer_id=dealer_id)
+        return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
 

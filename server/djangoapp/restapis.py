@@ -1,5 +1,6 @@
 import requests
 import json
+import sys
 # import related models here
 from requests.auth import HTTPBasicAuth
 from .models import CarDealer, DealerReview, CarModel, CarMake
@@ -32,7 +33,14 @@ def get_request(url, **kwargs):
 # Create a `post_request` to make HTTP POST requests
 # e.g., response = requests.post(url, params=kwargs, json=payload)
 def post_request(url, json_payload, **kwargs):
-    requests.post(url, params=kwargs, json=json_payload)
+    print(json_payload)
+    print("POST from {} ".format(url))
+    try: 
+        requests.post(url, params=kwargs, json=json_payload)
+    except:
+        # If any error occurs
+        print("Network exception occurred", sys.exc_info()[0])
+
 # Create a get_dealers_from_cf method to get dealers from a cloud function
 # def get_dealers_from_cf(url, **kwargs):
 # - Call get_request() with specified arguments
@@ -83,11 +91,12 @@ def get_dealer_reviews_by_id_from_cf(url, dealerId):
         for review in reviews:
             # Create a CarDealer object with values in `doc` object
             sentiment = analyze_review_sentiments(review["review"])
-            review_obj = DealerReview(id = review["id"],dealership=review["dealership"],
-                                      name=review["name"],purchase=review["purchase"], review=review["review"],
-                                      purchase_date=review["purchase_date"], car_make=review["car_make"],
-                                      car_model=review["car_model"], car_year=review["car_year"], sentiment=sentiment )
-            results.append(review_obj)
+            if('id' in review):
+                review_obj = DealerReview(id = review["id"],dealership=review["dealership"],
+                                        name=review["name"],purchase=review["purchase"], review=review["review"],
+                                        purchase_date=review["purchase_date"], car_make=review["car_make"],
+                                        car_model=review["car_model"], car_year=review["car_year"], sentiment=sentiment )
+                results.append(review_obj)
 
     return results
 # - Call get_request() with specified arguments
@@ -96,13 +105,16 @@ def get_dealer_reviews_by_id_from_cf(url, dealerId):
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text
 def analyze_review_sentiments(text_to_analyze):
-    response = natural_language_understanding.analyze(
-    text=text_to_analyze,
-    features=Features(
-        entities=EntitiesOptions(emotion=True, sentiment=True, limit=2),
-        keywords=KeywordsOptions(emotion=True, sentiment=True, limit=2))).get_result()   
+    try:    
+        response = natural_language_understanding.analyze(
+        text=text_to_analyze,
+        features=Features(
+            entities=EntitiesOptions(emotion=True, sentiment=True, limit=2),
+            keywords=KeywordsOptions(emotion=True, sentiment=True, limit=2))).get_result()   
 
-    sentiment = response["keywords"][0]["sentiment"]["label"]
+        sentiment = response["keywords"][0]["sentiment"]["label"]
+    except:
+        return "neutral"    
 
     return sentiment
 # - Call get_request() with specified arguments
