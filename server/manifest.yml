@@ -1,11 +1,11 @@
   applications:
-  - name: dealerreiew
+  - name: dealerreview
     routes:
-      - route: host.domain
+      - route: rmg-dr.us-south.cf.appdomain.cloud
     memory: 128M
     buildpack: python_buildpack
-  - name: dealerreiew-nginx
+  - name: dealerreview-nginx
     routes:
-      - route: host.domain/static
+      - route: rmg-dr.us-south.cf.appdomain.cloud/static
     memory: 128M
     buildpack: staticfile_buildpack
